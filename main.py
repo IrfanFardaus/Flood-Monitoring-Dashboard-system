@@ -241,7 +241,7 @@ def main():
 
             # turbidity percentage
             turb_percent = read_turbidity()
-            if turb_percent >= 30:
+            if turb_percent >= 50:
                 turb_status = "Muddy"
             elif turb_percent >= 2:
                 turb_status = "Dirty"
