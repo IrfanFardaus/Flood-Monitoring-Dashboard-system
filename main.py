@@ -47,8 +47,8 @@ PROJECT_ID = 'flood-monitor-c6977'
 API_KEY = 'AIzaSyAM-x6ZCqqxDx6ZDCE1JefDHwzLXvDq5M0' 
 
 # Parameter
-WIFI_SSID = 'MSI'
-WIFI_PASS = 'hinge123'
+WIFI_SSID = 'Nothing'
+WIFI_PASS = 'jackfruit'
 DEVICE_ID = "SENSOR_001"  # Unique identifier for this device
 sensor_height = 100 # Default sensor installation height from ground (cm)
 SETTINGS_FILE = 'settings.json' # File to store persistent data
@@ -110,8 +110,8 @@ def save_settings():
 def read_turbidity():
     """Reads analog value and converts to a dummy percentage."""
     val = turbidity_adc.read()
-    # Basic mapping from 0-4000 to 0-100%. Adjust formula based on sensor calibration.
-    percentage = 100.0 - ((val / 4000.0) * 100.0)
+    # Basic mapping from 0-4095 to 0-100%. Adjust formula based on sensor calibration.
+    percentage = 100.0 - ((val / 4095.0) * 100.0)
     if percentage < 0:
         percentage = 0.0
     elif percentage > 100:
