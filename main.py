@@ -176,10 +176,7 @@ def write_to_firestore(collection, data):
         # If Wi-Fi drops, it will fail here instead of crashing the whole board
         print("Error sending data:", e)
     finally:
-        # CRITICAL: The 'finally' block always runs, even if the 'try' block crashed.
-        # This guarantees the lock is released so the next cycle can upload.
-        upload_in_progress = False
-        # Thread naturally dies here    
+        upload_in_progress = False  
 
 
 
