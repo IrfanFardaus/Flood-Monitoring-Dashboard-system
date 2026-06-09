@@ -39,8 +39,8 @@ PROJECT_ID = 'flood-monitor-c6977'
 API_KEY = 'AIzaSyAM-x6ZCqqxDx6ZDCE1JefDHwzLXvDq5M0' 
 
 # Parameter
-WIFI_SSID = 'MSI'
-WIFI_PASS = 'hinge123'
+WIFI_SSID = 'Nothing'
+WIFI_PASS = 'jackfruit'
 DEVICE_ID = "SENSOR_002"
 sensor_height = 100 
 SETTINGS_FILE = 'settings.json'
