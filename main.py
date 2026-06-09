@@ -40,16 +40,14 @@ my_gps = MicropyGPS()
 i2c = I2C(0, scl=Pin(22), sda=Pin(21))
 oled = sh1106.SH1106_I2C(128, 64, i2c, rotate=180)
 
-# Firestore configuration (Extracted from your old URL: flood-monitoring-fe2af)
+# Firestore configuration
 PROJECT_ID = 'flood-monitor-c6977'
-
-# IMPORTANT: You must get this from Firebase Console -> Project Settings -> Web API Key
 API_KEY = 'AIzaSyAM-x6ZCqqxDx6ZDCE1JefDHwzLXvDq5M0' 
 
 # Parameter
 WIFI_SSID = 'Nothing'
 WIFI_PASS = 'jackfruit'
-DEVICE_ID = "SENSOR_001"  # Unique identifier for this device
+DEVICE_ID = "SENSOR_001"  # Unique identifier for device
 sensor_height = 100 # Default sensor installation height from ground (cm)
 SETTINGS_FILE = 'settings.json' # File to store persistent data
 settings_requested = False
@@ -57,9 +55,7 @@ last_btn3_press = 0
 upload_in_progress = False
 
 # Function blocks
-
-def connect_wifi():
-    """Connect to Wi-Fi and sync local time."""
+def connect_wifi():     # Connect to Wi-Fi and sync local time.
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     if not wlan.isconnected():
@@ -74,8 +70,6 @@ def connect_wifi():
     oled.text("WiFi Connected!", 0, 0)
     oled.show()
     time.sleep(1)
-
-    # --- ADDED: Sync board time with internet ---
     try:
         print("Syncing time via NTP...")
         ntptime.settime()
@@ -83,8 +77,7 @@ def connect_wifi():
     except Exception as e:
         print("Failed to sync time:", e)
 
-def load_settings():
-    """Loads configuration from a JSON file in flash memory."""
+def load_settings():      # Loads configuration from a JSON file in flash memory.
     global sensor_height
     try:
         with open(SETTINGS_FILE, 'r') as f:
@@ -98,8 +91,7 @@ def load_settings():
     except Exception as e:
         print(f"[ERROR] Failed to load settings: {e}")
 
-def save_settings():
-    """Saves current configuration to a JSON file in flash memory."""
+def save_settings():       # Saves current configuration to a JSON file in flash memory.
     try:
         with open(SETTINGS_FILE, 'w') as f:
             json.dump({'sensor_height': sensor_height}, f)
@@ -110,7 +102,7 @@ def save_settings():
 def read_turbidity():
     """Reads analog value and converts to a dummy percentage."""
     val = turbidity_adc.read()
-    # Basic mapping from 0-4095 to 0-100%. Adjust formula based on sensor calibration.
+    # Basic mapping from 0-4095 to 0-100%.
     percentage = 100.0 - ((val / 4095.0) * 100.0)
     if percentage < 0:
         percentage = 0.0
@@ -118,8 +110,8 @@ def read_turbidity():
         percentage = 100.0
     return percentage
 
-def update_gps():
-    """Safely updates GPS data without fragmenting RAM"""
+def update_gps():   # Safely updates GPS data without fragmenting RAM
+    
     while gps_uart.any():
         gps_uart.read(gps_uart.any())
         
@@ -131,8 +123,8 @@ def update_gps():
             for byte in raw_data:
                 my_gps.update(chr(byte))
 
-def btn3_isr(pin):
-    """Interrupt Service Routine for Button 3"""
+def btn3_isr(pin):        # Interrupt Service Routine for Button 3
+
     global settings_requested, last_btn3_press
     current_time = time.ticks_ms()
     
@@ -142,8 +134,7 @@ def btn3_isr(pin):
 
 btn3.irq(trigger=Pin.IRQ_FALLING, handler=btn3_isr)
 
-def format_firestore_doc(data):
-    """Converts a standard Python dictionary into the strict Firestore Document format."""
+def format_firestore_doc(data):       # Converts a standard Python dictionary into the strict Firestore Document format.
     fields = {}
     for key, value in data.items():
         if isinstance(value, bool):
@@ -156,7 +147,7 @@ def format_firestore_doc(data):
             fields[key] = {"stringValue": str(value)} # Convert tuples (like GPS) to string
     return {"fields": fields}
 
-def write_to_firestore(collection, data):
+def write_to_firestore(collection, data): # Threaded function to send data to Firestore without blocking the main loop.
     global upload_in_progress
     
     url = f"https://firestore.googleapis.com/v1/projects/{PROJECT_ID}/databases/(default)/documents/{collection}?key={API_KEY}"
@@ -176,14 +167,11 @@ def write_to_firestore(collection, data):
         # If Wi-Fi drops, it will fail here instead of crashing the whole board
         print("Error sending data:", e)
     finally:
-        # CRITICAL: The 'finally' block always runs, even if the 'try' block crashed.
-        # This guarantees the lock is released so the next cycle can upload.
-        upload_in_progress = False
-        # Thread naturally dies here    
+        upload_in_progress = False  
 
 
 
-def main():
+def main():  #  Main function that runs the flood monitoring dashboard, handles sensor readings, user input, and data uploads.
     global sensor_height, settings_requested, upload_in_progress
 
     led_green.value(0)
@@ -226,7 +214,7 @@ def main():
                     sleep(1)
                     break
 
-        else:
+        else: # Main monitoring loop
             dist_left = sensor1.distance_cm()
             dist_right = sensor2.distance_cm()
             update_gps()
@@ -268,7 +256,7 @@ def main():
                 else:
                     warning_start_ticks = None # Reset timer if it drops below 15
 
-                # Evaluate flowchart conditions
+                # Determine severity based on thresholds and timers
                 if avg_depth >= 40.0 and danger_start_ticks is not None and time.ticks_diff(current_ticks, danger_start_ticks) >= THREE_MINUTES_MS:
                     severity_status = "DANGER"
                     led_green.value(0)
@@ -296,8 +284,6 @@ def main():
                 gps_status_text = "GPS:OK"
             else:
                 gps_status_text = "GPS:NO"
-            # OLED DASHBOARD
-
 
             print(f"[ULTRASONIC] Left: {dist_left:.1f}cm | Right: {dist_right:.1f}cm")
             print(f"[DATA] Sensor Height Base: {sensor_height}cm | Current Depth: {avg_depth:.1f}cm")
@@ -307,9 +293,8 @@ def main():
             print(f"[SEVERITY] Level: {severity_status}")
             print("-------------------------")
 
-
-
-            oled.fill(0)
+            #  OLED DISPLAY UPDATE
+            oled.fill(0) 
             
             oled.text("FLOOD M", 0, 0)
             oled.text(gps_status_text, 76, 0)
@@ -328,7 +313,7 @@ def main():
             oled.text(f"L:{dist_left:.0f}cm  R:{dist_right:.0f}cm", 0, 57)
             oled.show()
 
-            sensor_data = {
+            sensor_data = {  # This dictionary will be converted to Firestore format and uploaded as a new document in the "sensor_history" collection.
                 "device_id": str(DEVICE_ID),        
                 "depth_cm": float(avg_depth),
                 "turbidity_percent": float(turb_percent),
@@ -345,7 +330,6 @@ def main():
                 upload_in_progress = True 
                 _thread.start_new_thread(write_to_firestore, ("sensor_history", sensor_data))
             else:
-                # Optional: Print to console so you know it skipped properly
                 print("[WARNING] Upload still in progress, skipping this data point.")
 
             for _ in range(50):

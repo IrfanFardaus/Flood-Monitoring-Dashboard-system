@@ -1,49 +1,40 @@
-from machine import ADC, Pin
+from machine import Pin, ADC
 import time
 
-# === Configuration ===
-TURBIDITY_PIN = 34  # Use an ADC-capable pin on ESP32
-ADC_ATTEN = ADC.ATTN_11DB  # Full range: 0 - 3.3V
-ADC_WIDTH = ADC.WIDTH_12BIT  # 0 - 4095 resolution
-VREF = 3.3  # ESP32 ADC reference voltage
+# --- Setup Analog Pin (A0) ---
+# We use Pin 34, which is a dedicated input pin on the ESP32.
+turbidity_analog = ADC(Pin(34))
 
-# === Initialize ADC ===
-adc = ADC(Pin(TURBIDITY_PIN))
-adc.atten(ADC_ATTEN)
-adc.width(ADC_WIDTH)
+# Set the ADC attenuation to read the full 0 to 3.3V range.
+# Without this, the ESP32 caps its reading at about 1.0V.
+turbidity_analog.atten(ADC.ATTN_11DB) 
 
-def read_voltage():
-    """Read sensor voltage from ADC."""
-    raw = adc.read()
-    voltage = (raw / 4095) * VREF
-    return voltage
+# --- Setup Digital Pin (D0) ---
+# Optional: Reads the threshold trigger (adjusted via the blue screw on the board)
+turbidity_digital = Pin(32, Pin.IN)
 
-def voltage_to_ntu(voltage):
-    """
-    Linear calibration for ESP32.
-    Replace V_CLEAR and V_MUDDY with the actual voltages you measured!
-    """
-    V_CLEAR = 2.8  # The voltage you measured in clean water
-    V_MUDDY = 1.5  # The voltage you measured in highly turbid water
+print("Starting Turbidity Sensor Readings...")
+print("-" * 35)
+
+while True:
+    # 1. Read the raw analog value (returns a number between 0 and 4095)
+    raw_adc = turbidity_analog.read()
     
-    # If water is cleaner than our baseline, return 0
-    if voltage >= V_CLEAR:
-        return 0.0
-    # If water is dirtier than our baseline, return max NTU (e.g., 3000)
-    elif voltage <= V_MUDDY:
-        return 3000.0
+    # 2. Convert the raw value to an approximate voltage (0V to 3.3V)
+    # Note: This represents the voltage *after* your voltage divider.
+    voltage = raw_adc * (3.3 / 4095.0)
+    
+    # 3. Read the digital alert state
+    # Usually, 1 (HIGH) means clear water, 0 (LOW) means it crossed the dirty threshold.
+    is_dirty = turbidity_digital.value() == 0
+    
+    # 4. Print the formatted results to the console
+    if is_dirty:
+        alert_status = "⚠️ ALERT: Turbidity Threshold Exceeded!"
     else:
-        # Linearly map the voltage between 0 and 3000 NTU
-        ntu = (V_CLEAR - voltage) / (V_CLEAR - V_MUDDY) * 3000.0
-        return ntu
+        alert_status = "✅ Normal (Clear)"
 
-# === Main Loop ===
-try:
-    while True:
-        voltage = read_voltage()
-        ntu = voltage_to_ntu(voltage)
-        print("Voltage: {:.2f} V | Turbidity: {:.2f} NTU".format(voltage, ntu))
-        time.sleep(1)
-
-except KeyboardInterrupt:
-    print("Measurement stopped.")
+    print(f"Raw: {raw_adc:4d} | Volts: {voltage:.2f}V | Status: {alert_status}")
+    
+    # Wait 1 second before the next reading
+    time.sleep(1)
