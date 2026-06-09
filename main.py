@@ -317,6 +317,8 @@ def main():
             
             oled.text(f"Depth: {avg_depth:.1f} cm", 0, 15)
             oled.text(f"Water: {turb_status}", 0, 27)
+            oled.text(f"{turb_percent:.0f}%", 100, 27)
+            
             
             oled.text("Alert:", 0, 41)
             oled.rect(50, 38, 70, 13, 1) 
