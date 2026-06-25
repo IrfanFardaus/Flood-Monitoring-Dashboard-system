@@ -6,6 +6,8 @@ A vehicle-mounted IoT system that provides real-time flood monitoring with water
 > **Supervisor:** Dr. Mohd Zaki Bin Ayob  
 > **Programme:** Bachelor of Electronic Engineering Technology with Honours
 
+> **Related Repository:** [Web Dashboard](https://github.com/IrfanFardaus/Flood-Monitoring-Dashboard-web)
+
 ---
 
 ## 📌 Overview
