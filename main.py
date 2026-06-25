@@ -41,12 +41,12 @@ i2c = I2C(0, scl=Pin(22), sda=Pin(21))
 oled = sh1106.SH1106_I2C(128, 64, i2c, rotate=180)
 
 # Firestore configuration
-PROJECT_ID = 'flood-monitor-c6977'
-API_KEY = 'AIzaSyAM-x6ZCqqxDx6ZDCE1JefDHwzLXvDq5M0' 
+PROJECT_ID = 'your-firebase-project-id'
+API_KEY    = 'your-firebase-api-key'
 
 # Parameter
-WIFI_SSID = 'Nothing'
-WIFI_PASS = 'jackfruit'
+WIFI_SSID = 'Your_WiFi_Name'
+WIFI_PASS = 'Your_WiFi_Password'
 DEVICE_ID = "SENSOR_001"  # Unique identifier for device
 sensor_height = 100 # Default sensor installation height from ground (cm)
 SETTINGS_FILE = 'settings.json' # File to store persistent data
