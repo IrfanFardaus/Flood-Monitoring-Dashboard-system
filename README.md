@@ -16,7 +16,7 @@ Traditional flood monitoring relies on fixed sensors at riverbanks and tunnels, 
 
 The system captures real-time flood depth, water turbidity, and GPS coordinates, transmits the data to Google Firebase Firestore, and visualises everything on a responsive web dashboard with live map markers.
 
-**PCB layout and Schematic:** [Here](https://github.com/IrfanFardaus/Flood-Monitoring-Dashboard-web/fyp_flood.pdf)
+**PCB layout and Schematic:** [Here](https://github.com/IrfanFardaus/Flood-Monitoring-Dashboard-system/blob/main/fyp_flood.pdf)
 
 ---
 
