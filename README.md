@@ -2,10 +2,6 @@
 
 A vehicle-mounted IoT system that provides real-time flood monitoring with water depth, turbidity detection, GPS tracking, and a live web-based dashboard. Built as a Final Year Project at **Universiti Kuala Lumpur (UniKL), 2026**.
 
-> **Author:** Muhammad Irfan Bin Mohd Fardaus  
-> **Supervisor:** Dr. Mohd Zaki Bin Ayob  
-> **Programme:** Bachelor of Electronic Engineering Technology with Honours
-
 > **Related Repository:** [Web Dashboard](https://github.com/IrfanFardaus/Flood-Monitoring-Dashboard-web)
 
 ---
